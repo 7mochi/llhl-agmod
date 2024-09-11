@@ -27,3 +27,12 @@
 *.exe
 *.out
 *.app
+
+# VS and local database files
+*.db
+*.opendb
+*.sdf
+.vs
+
+# Output directory
+output

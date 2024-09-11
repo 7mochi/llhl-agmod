@@ -1,1 +1,0 @@
-makensis-bz2.exe aghl.nsi
