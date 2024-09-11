@@ -290,6 +290,8 @@ typedef struct enginefuncs_s
 	void (*pfnProcessTutorMessageDecayBuffer)(int *buffer, int bufferLength);
 	void (*pfnConstructTutorMessageDecayBuffer)(int *buffer, int bufferLength);
 	void (*pfnResetTutorMessageDecayData)( void );
+	void (*pfnQueryClientCvarValue)( const edict_t *player, const char *cvarName );
+	void (*pfnQueryClientCvarValue2)( const edict_t *player, const char *cvarName, int requestID );
 } enginefuncs_t;
 
 
@@ -507,11 +509,38 @@ extern DLL_FUNCTIONS		gEntityInterface;
 
 typedef struct
 {
-	// Called right before the object's memory is freed. 
-	// Calls its destructor.
+	/**
+	*	Called when an entity is freed by the engine, right before the object's memory is freed. Calls OnDestroy and runs the destructor.
+	*/
 	void			(*pfnOnFreeEntPrivateData)(edict_t *pEnt);
+
+	/**
+	*	Called when the game unloads this DLL.
+	*/
 	void			(*pfnGameShutdown)(void);
+
+	/**
+	*	Called when the engine believes two entities are about to collide. Return 0 if you
+	*	want the two entities to just pass through each other without colliding or calling the
+	*	touch function.
+	*/
 	int				(*pfnShouldCollide)( edict_t *pentTouched, edict_t *pentOther );
+
+	/**
+	*	Called when the engine has received a cvar value from the client in response to an enginefuncs_t::pfnQueryClientCvarValue call.
+	*	If the client isn't connected, or the cvar didn't exist, the value given is "Bad CVAR request".
+	*	@param pEnt Client entity.
+	*	@param value Cvar value.
+	*/
+	void			(*pfnCvarValue)( const edict_t *pEnt, const char *value );
+
+	/**
+	*	Called when the engine has received a cvar value from the client in response to a enginefuncs_t::pfnQueryClientCvarValue2 call.
+	*	@param requestID The ID given to the pfnQueryClientCvarValue2 function.
+	*	@param cvarName Name of the cvar that was queried.
+	*	@see pfnCvarValue
+	*/
+	void			(*pfnCvarValue2)( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
 } NEW_DLL_FUNCTIONS;
 typedef int	(*NEW_DLL_FUNCTIONS_FN)( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 

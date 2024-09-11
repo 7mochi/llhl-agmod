@@ -225,6 +225,17 @@ bool AgVote::HandleCommand(CBasePlayer* pPlayer)
 
         return true;
       }
+      else if (FStrEq(m_sVote.c_str(), "fpslimitmode"))
+      {
+        if (LLHL != AgGametype())
+        {
+          AgConsole("Vote is not allowed in this gamemode.", pPlayer);
+          return true;
+        }
+
+        CallVote(pPlayer);
+        return true;
+      }
       //Start and pause should be there.
       else if (FStrEq(m_sVote.c_str(),"agstart") ||
                FStrEq(m_sVote.c_str(),"agabort") ||
@@ -462,6 +473,10 @@ void AgVote::Think()
       else if (FStrEq(m_sVote.c_str(),"agkick"))
       {
         Command.Kick(m_sValue);
+      }
+      else if (FStrEq(m_sVote.c_str(), "fpslimitmode"))
+      {
+        Command.FpsLimitMode();
       }
       else
       {

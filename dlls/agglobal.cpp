@@ -171,7 +171,11 @@ DLL_GLOBAL cvar_t ag_dom_scorelimit        = {"sv_ag_dom_scorelimit", "200"}; //
 //-- muphicks
 
 DLL_GLOBAL cvar_t ag_gauss_fix = {"ag_gauss_fix","0"};            //Default 0 - no fix.
-DLL_GLOBAL cvar_t ag_rpg_fix   = {"ag_rpg_fix","0"};            //Default 0 - no fix.
+DLL_GLOBAL cvar_t ag_rpg_fix   = {"ag_rpg_fix","0"};    
+        //Default 0 - no fix.
+DLL_GLOBAL cvar_t	ag_fps_limit_warnings = { "ag_fps_limit_warnings", "3", FCVAR_SERVER };  // Default: 3 - How many warnings before applying the punishment
+DLL_GLOBAL cvar_t	ag_fps_limit_warnings_interval = { "ag_fps_limit_warnings_interval", "5.0", FCVAR_SERVER };  // Default: 5 seconds - Time between warnings
+
 
 DLL_GLOBAL cvar_t	mm_agsay    = {"mm_agsay","1", FCVAR_SERVER }; 
 
@@ -326,6 +330,8 @@ void AgInitGame()
 
   CVAR_REGISTER ( &ag_gauss_fix);
   CVAR_REGISTER ( &ag_rpg_fix);
+  CVAR_REGISTER ( &ag_fps_limit_warnings);
+  CVAR_REGISTER ( &ag_fps_limit_warnings_interval);
 
   CVAR_REGISTER ( &mm_agsay);
 

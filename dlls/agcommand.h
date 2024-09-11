@@ -42,6 +42,8 @@ public:
   static void Spectator(CBasePlayer* pPlayer, const AgString& sPlayerIdOrName);
 
   static void Exec(const AgString& sExec, CBasePlayer* pPlayer);
+  
+  static void FpsLimitMode();
 };
 
 extern DLL_GLOBAL AgCommand Command;

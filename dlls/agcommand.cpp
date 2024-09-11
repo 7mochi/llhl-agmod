@@ -190,6 +190,17 @@ void  exec(void)
   exec_client(NULL);
 }
 
+
+void fpslimitmode_client(CBasePlayer* pPlayer)
+{
+  Command.FpsLimitMode();
+}
+
+void fpslimitmode(void)
+{
+  fpslimitmode_client(NULL);
+}
+
 FILE_GLOBAL COMMANDS s_Commands[]=
 {
   "agaddadmin",addadmin,NULL,"agaddadmin <admin> <password> - Add new admin.",
@@ -209,6 +220,9 @@ FILE_GLOBAL COMMANDS s_Commands[]=
   "agpause",agpause,pause_client,"agpause - Pause server.",
   "help",help,help_client,"help - List commands.",
   "variables",variables,variables_client,"variables - Server variable list.",
+
+  // LLHL
+  "fpslimitmode", fpslimitmode,fpslimitmode_client,"fpslimitmode - Change between fps limit modes. (144 or 240)",
 };
 
 
@@ -324,6 +338,7 @@ bool AgCommand::HandleCommand(CBasePlayer* pPlayer)
        ||0 == strnicmp(CMD_ARGV(0),"mp_fraglimit",12)
        ||0 == strnicmp(CMD_ARGV(0),"mp_friendlyfire",15)
        ||0 == strnicmp(CMD_ARGV(0),"mp_weaponstay",13)
+       //||0 == strnicmp(CMD_ARGV(0),"ag_fps_limit",12)
        ))
     {
       if (1 == CMD_ARGC())
@@ -548,6 +563,19 @@ void AgCommand::Exec(const AgString& sExec, CBasePlayer* pPlayer)
   sprintf(szCommand,"exec %s\n",sExec.c_str());
   SERVER_COMMAND( szCommand );
   SERVER_EXECUTE();
+}
+
+void AgCommand::FpsLimitMode()
+{
+  // Hardcoded default values: 144.0 and 240.0
+  if (144 == g_flActualFpsLimit)
+    g_flActualFpsLimit = 240.0;
+  else if (240 == g_flActualFpsLimit)
+    g_flActualFpsLimit = 144.0;
+  
+  char szMessage[128];
+  sprintf(szMessage,"FPS limit has changed to %.2f",g_flActualFpsLimit);
+  AgSay(NULL, szMessage,NULL,3.5,0.03,0.05,2);
 }
 
 //-- Martin Webrant

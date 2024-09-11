@@ -95,6 +95,14 @@ static DLL_FUNCTIONS gFunctionTable =
 	AllowLagCompensation,		//pfnAllowLagCompensation
 };
 
+NEW_DLL_FUNCTIONS gNewDLLFunctions = {
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	CvarValue2
+};
+
 static void SetObjectCollisionBox( entvars_t *pev );
 
 #ifndef _WIN32
@@ -128,6 +136,17 @@ int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
 }
 #endif
 
+int GetNewDLLFunctions(NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion)
+{
+	if (!pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION)
+	{
+		*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
+		return 0;
+	}
+
+	memcpy(pFunctionTable, &gNewDLLFunctions, sizeof(NEW_DLL_FUNCTIONS));
+	return 1;
+}
 
 int DispatchSpawn( edict_t *pent )
 {

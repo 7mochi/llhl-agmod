@@ -45,6 +45,7 @@ extern DLL_GLOBAL int		g_iSkillLevel, gDisplayTitle;
 
 
 BOOL gInitHUD = TRUE;
+float g_flActualFpsLimit = 144.0; // Hardcoded default value
 
 extern void CopyToBodyQue(entvars_t* pev);
 extern void respawn(entvars_t *pev, BOOL fCopyCorpse);
@@ -1862,6 +1863,8 @@ void CBasePlayer::PreThink(void)
 	if ( g_fGameOver )
 		return;         // intermission or finale
 
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "fps_max", request_ids::REQUEST_ID_FPS_MAX);
+
   //++ BulliT
   if (IsSpectator() || ARENA == AgGametype() || LMS == AgGametype())
     EnableControl(TRUE);
@@ -2697,6 +2700,15 @@ void CBasePlayer::PostThink()
 //++ BulliT
 //  // Track button info so we can detect 'pressed' and 'released' buttons next frame
 //  m_afButtonLast = pev->button;
+
+  if (ShouldLimitFps())
+  {
+	// only in gamemode llhl
+	if (LLHL == AgGametype())
+	{
+		LimitFps();
+	}
+  }
   
   
   //Remove observe mode if using attack or use.
@@ -5680,4 +5692,50 @@ void CBasePlayer::ShowVGUI(int iMenu)
     MESSAGE_BEGIN(MSG_ONE, gmsgVGUIMenu, NULL, pev);
       WRITE_BYTE( iMenu );
     MESSAGE_END();
+}
+
+// Can the fps limit be applied on this player?
+bool CBasePlayer::ShouldLimitFps()
+{
+	if (IsSpectator() || IsProxy() || (pev->flags & FL_FAKECLIENT))
+		return false;
+
+	return true;
+}
+
+void CBasePlayer::LimitFps()
+{
+	float fpsLimit = g_flActualFpsLimit;
+
+	if (fpsLimit == 0)
+		return;
+
+	if (fpsLimit < MIN_FPS_LIMIT)
+	{
+		fpsLimit = MIN_FPS_LIMIT;
+		g_flActualFpsLimit = MIN_FPS_LIMIT;
+	}
+
+	if (fpsLimit >= m_flFpsMax)
+		return;
+	
+	if (m_flNextFpsWarning < gpGlobals->time)
+	{
+		m_flNextFpsWarning = gpGlobals->time + ag_fps_limit_warnings_interval.value;
+		m_iFpsWarnings++;
+
+		CLIENT_COMMAND(edict(), "fps_max %.2f\n", fpsLimit);
+
+		char text[80];
+		sprintf(text, "Warning #%d: Your 'fps_max' can't be higher than %.2f\n", m_iFpsWarnings, fpsLimit);
+		UTIL_SayText(text, this);
+	}
+
+	if (m_iFpsWarnings > ag_fps_limit_warnings.value)
+	{
+		char szCommand[64], text[80];
+		sprintf(text, "Your 'fps_max' value is higher than %.2f\n", fpsLimit);
+		sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), text);
+		SERVER_COMMAND(szCommand);
+	}
 }

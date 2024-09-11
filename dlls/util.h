@@ -138,6 +138,12 @@ inline entvars_t *VARS(edict_t *pent)
 
 inline entvars_t* VARS(EOFFSET eoffset)				{ return VARS(ENT(eoffset)); }
 inline int	  ENTINDEX(edict_t *pEdict)			{ return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
+#ifndef USE_METAMOD // Metamod provides that overload so disable it in AMXX module to avoid conflicts
+inline int ENTINDEX(const edict_t *pEdict)
+{
+	return (*g_engfuncs.pfnIndexOfEdict)(pEdict);
+}
+#endif
 inline edict_t* INDEXENT( int iEdictNum )		{ return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
 //++ BulliT
 #ifndef AGMSGSTAT

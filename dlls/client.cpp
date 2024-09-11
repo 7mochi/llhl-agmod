@@ -1923,3 +1923,21 @@ int AllowLagCompensation( void )
 //-- Martin Webrant
   return 1;
 }
+
+// Credits: tmp64 (from https://github.com/tmp64/BugfixedHL-Rebased/)
+// When the pfnQueryClientCvarValue2() completes it will call pfnCvarValue2() with the
+// request ID you supplied earlier, the name of the cvar you requested and the value of that cvar.
+void CvarValue2(const edict_t *pEnt, int requestID, const char *cvarName, const char *value)
+{
+	int idx = ENTINDEX(pEnt);
+	if (idx < 1 || idx > gpGlobals->maxClients)
+		return; // Invalid pEnt
+
+	CBasePlayer *pPlayer = dynamic_cast<CBasePlayer*>(UTIL_PlayerByIndex(idx));
+	if ( !pPlayer )
+        return;
+
+	if (requestID == request_ids::REQUEST_ID_FPS_MAX)
+		pPlayer->m_flFpsMax = atof(value);
+
+}

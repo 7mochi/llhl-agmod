@@ -91,6 +91,11 @@ enum sbar_data
 	SBAR_END,
 };
 
+enum request_ids
+{
+	REQUEST_ID_FPS_MAX = 1,
+};
+
 
 class CBasePlayer : public CBaseMonster
 {
@@ -317,6 +322,11 @@ public:
 	char m_SbarString0[ SBAR_STRING_SIZE ];
 	char m_SbarString1[ SBAR_STRING_SIZE ];
 
+	// Used for framerate limitation
+	static constexpr float MIN_FPS_LIMIT = 20.0; // reasonable limit in case someone limits it to 1 thinking that 1 means just to enable the limiter
+	int m_iFpsWarnings;
+	float m_flNextFpsWarning;
+
 //++ BulliT
 protected:
   bool m_bAdmin;            //Player gained admin status.
@@ -378,6 +388,9 @@ public:
 
   //Maps
   int m_iMapListSent;
+
+  // Used for framerate limitation
+  float m_flFpsMax;
 
 
   void          Init();     //Init all extra variables.
@@ -448,6 +461,8 @@ public:
   void SetWeaponWeight(const char* pszWeaponWeights);
   void InitWeaponWeight();
   */
+  bool ShouldLimitFps();
+  void LimitFps();
 //-- Martin Webrant
 };
 //++ BulliT
@@ -547,6 +562,9 @@ inline void CBasePlayer::Init()
   m_fNextPlayerId = 0.0;
   m_bSentCheatCheck = false;
 
+  m_flFpsMax = 0.0;
+  m_iFpsWarnings = 0;
+  m_flNextFpsWarning = gpGlobals->time + ag_fps_limit_warnings_interval.value;
 #ifdef _DEBUG
   if (0 == strcmp(GetAuthID(),"237555"))
     m_bAdmin = true;
@@ -646,7 +664,8 @@ inline bool CBasePlayer::DisableSpecs()
 #define AUTOAIM_10DEGREES 0.1736481776669
 
 
-extern int	gmsgHudText;
-extern BOOL gInitHUD;
+extern int		gmsgHudText;
+extern BOOL		gInitHUD;
+extern float 	g_flActualFpsLimit;
 
 #endif // PLAYER_H

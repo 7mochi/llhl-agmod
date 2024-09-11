@@ -165,6 +165,9 @@ extern cvar_t ag_dom_scorelimit;
 extern cvar_t ag_gauss_fix;
 extern cvar_t ag_rpg_fix;
 
+extern cvar_t ag_fps_limit_warnings;
+extern cvar_t ag_fps_limit_warnings_interval;
+
 extern bool g_bLangame;
 extern bool g_bUseTeamColors;
 
