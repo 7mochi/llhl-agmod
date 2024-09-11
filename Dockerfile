@@ -14,9 +14,6 @@ COPY . /app
 
 RUN CPATH=$CPATH:/usr/include/c++/4.8.5/i686-redhat-linux CFG=$CONFIGURATION make -C dlls
 
-RUN ls
-
-RUN echo "qqqq"
 RUN mkdir -p /output && cp dlls/ag_i386.so /output/ag.so
 
 ENTRYPOINT ["sh", "-c", "cp /output/ag.so /mnt/output/ag.so"]
