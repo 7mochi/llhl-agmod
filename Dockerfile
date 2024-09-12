@@ -3,10 +3,7 @@ FROM centos:centos7
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
 RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
-RUN yum install -y make \
-    yum install -y git \
-    yum install -y gcc gcc-c++ \
-    yum install -y glibc-devel.i686 libstdc++-devel.i686
+RUN yum install -y make git gcc gcc-c++ glibc-devel.i686 libstdc++-devel.i686
 
 WORKDIR /app
 
