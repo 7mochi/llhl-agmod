@@ -1,0 +1,42 @@
+name: C/C++ CI
+
+on:
+  push:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-2019
+  
+    steps: 
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with: 
+        fetch-depth: 0
+        
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.1
+        
+    - name: Build release
+      run: |
+        msbuild multiplayer.sln -target:hl /p:Configuration=Release
+
+        mkdir testing
+        mkdir testing\dlls
+
+        copy dlls\msvc\Release\hl.dll testing\dlls\
+        copy network\delta.lst testing
+
+    - name: Get current tag and commit SHA for artifact naming
+      id: naming
+      run: |
+        echo "tag=$(git describe --tags --abbrev=0)" >> $Env:GITHUB_OUTPUT
+        echo "sha_short=$(git rev-parse --short HEAD)" >> $Env:GITHUB_OUTPUT
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bugfixedhl-${{ steps.naming.outputs.tag }}-win32-${{ steps.naming.outputs.sha_short }}
+        path: bugfixedhl-windows

@@ -118,7 +118,6 @@ EXIT /B 0
 FOR /F "tokens=1,2,3 delims=.+" %%a IN ("%new_version%") DO SET major=%%a&SET minor=%%b&SET patch=%%c
 
 ECHO Updating appversion.h, old version "%old_version%", new version "%new_version%".
-ECHO Major: %major%, Minor: %minor%, Patch: %patch%.
 
 ECHO #ifndef __APPVERSION_H__>"%srcdir%\appversion.h"
 ECHO #define __APPVERSION_H__>>"%srcdir%\appversion.h"
@@ -150,7 +149,7 @@ ECHO #endif //__APPVERSION_H__>>"%srcdir%\appversion.h"
 ::
 :: Update last modify time on files that use appversion.h header to force them to recompile
 ::
-COPY /B "%srcdir%\msvc\client.rc"+,, "%srcdir%\msvc\client.rc" >NUL
-COPY /B "%srcdir%\hud.cpp"+,, "%srcdir%\hud.cpp" >NUL
+COPY /B "%srcdir%\msvc\hl.rc"+,, "%srcdir%\msvc\hl.rc" >NUL
+COPY /B "%srcdir%\game.cpp"+,, "%srcdir%\game.cpp" >NUL
 
 EXIT /B 0

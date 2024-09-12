@@ -57,6 +57,8 @@ CBaseEntity
 #define EXPORT	/* */
 #endif
 
+#define DLLEXPORT __declspec( dllexport )
+
 extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
 extern "C" EXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 extern "C" DLLEXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion);
