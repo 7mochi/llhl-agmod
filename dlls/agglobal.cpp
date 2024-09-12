@@ -170,7 +170,7 @@ DLL_GLOBAL cvar_t ag_dom_resetscorelimit   = {"sv_ag_dom_resetscorelimit", "6"};
 DLL_GLOBAL cvar_t ag_dom_scorelimit        = {"sv_ag_dom_scorelimit", "200"}; // max points a team needs to get to win the game
 //-- muphicks
 
-DLL_GLOBAL cvar_t	ag_fps_limit_warnings = { "sv_ag_fps_limit_warnings", "3", FCVAR_SERVER };  // Default: 3 - How many warnings before applying the punishment
+DLL_GLOBAL cvar_t	ag_fps_limit_warnings = { "sv_ag_fps_limit_warnings", "2", FCVAR_SERVER };  // Default: 2 - How many warnings before applying the punishment
 DLL_GLOBAL cvar_t	ag_fps_limit_warnings_interval = { "sv_ag_fps_limit_warnings_interval", "5.0", FCVAR_SERVER };  // Default: 5 seconds - Time between warnings
 
 DLL_GLOBAL cvar_t ag_gauss_fix = {"ag_gauss_fix","0"};            //Default 0 - no fix.
