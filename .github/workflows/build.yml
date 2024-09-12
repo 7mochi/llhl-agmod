@@ -1,0 +1,81 @@
+name: C/C++ CI
+
+on:
+  push:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container: centos:centos7
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 0
+        
+    - name: Build release
+      run: |
+        sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+        
+        yum install -y make git gcc gcc-c++ glibc-devel.i686 libstdc++-devel.i686
+
+        CPATH=$CPATH:/usr/include/c++/4.8.5/i686-redhat-linux CFG=$CONFIGURATION make -C dlls
+
+        mkdir ag-llhl-linux
+        mkdir -p ag-llhl-linux/dlls
+
+        cp -i dlls/ag_i386.so ag-llhl-linux/dlls/ag.so
+        cp -i network/delta.lst ag-llhl-linux
+
+    - name: Get current tag and commit SHA for artifact naming
+      id: naming
+      run: |
+        echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+        echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ag-llhl-${{ steps.naming.outputs.tag }}-linux-${{ steps.naming.outputs.sha_short }}
+        path: ag-llhl-linux
+
+  build-windows:
+    runs-on: windows-2019
+  
+    steps: 
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with: 
+        fetch-depth: 0
+        
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.1
+        
+    - name: Build release
+      run: |
+        msbuild multiplayer.sln -target:ag /p:Configuration=Release
+
+        mkdir ag-llhl-windows
+        mkdir ag-llhl-windows\dlls
+
+        copy dlls\msvc\Release\ag.dll ag-llhl-windows\dlls\
+        copy network\delta.lst ag-llhl-windows
+
+    - name: Get current tag and commit SHA for artifact naming
+      id: naming
+      run: |
+        echo "tag=$(git describe --tags --abbrev=0)" >> $Env:GITHUB_OUTPUT
+        echo "sha_short=$(git rev-parse --short HEAD)" >> $Env:GITHUB_OUTPUT
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ag-llhl-${{ steps.naming.outputs.tag }}-win32-${{ steps.naming.outputs.sha_short }}
+        path: ag-llhl-windows
