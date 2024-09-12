@@ -338,7 +338,6 @@ bool AgCommand::HandleCommand(CBasePlayer* pPlayer)
        ||0 == strnicmp(CMD_ARGV(0),"mp_fraglimit",12)
        ||0 == strnicmp(CMD_ARGV(0),"mp_friendlyfire",15)
        ||0 == strnicmp(CMD_ARGV(0),"mp_weaponstay",13)
-       //||0 == strnicmp(CMD_ARGV(0),"ag_fps_limit",12)
        ))
     {
       if (1 == CMD_ARGC())
