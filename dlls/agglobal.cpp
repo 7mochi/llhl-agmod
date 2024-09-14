@@ -172,6 +172,9 @@ DLL_GLOBAL cvar_t ag_dom_scorelimit        = {"sv_ag_dom_scorelimit", "200"}; //
 
 DLL_GLOBAL cvar_t	ag_fps_limit_warnings = { "sv_ag_fps_limit_warnings", "2", FCVAR_SERVER };  // Default: 2 - How many warnings before applying the punishment
 DLL_GLOBAL cvar_t	ag_fps_limit_warnings_interval = { "sv_ag_fps_limit_warnings_interval", "5.0", FCVAR_SERVER };  // Default: 5 seconds - Time between warnings
+DLL_GLOBAL cvar_t ag_fov_min_enabled = { "sv_ag_fov_min_enabled", "1", FCVAR_SERVER };  // Default: 1 - Enable/Disable default_fov minimum value check
+DLL_GLOBAL cvar_t ag_fov_min_check_interval = { "sv_ag_fov_min_check_interval", "1.5", FCVAR_SERVER };  // Default: 1.5 seconds - Time between checks
+DLL_GLOBAL cvar_t ag_fov_min = { "sv_ag_fov_min", "85", FCVAR_SERVER };  // Default: 85 - Minimum value for default_fov
 
 DLL_GLOBAL cvar_t ag_gauss_fix = {"ag_gauss_fix","0"};            //Default 0 - no fix.
 DLL_GLOBAL cvar_t ag_rpg_fix   = {"ag_rpg_fix","0"};    
@@ -331,8 +334,12 @@ void AgInitGame()
 
   CVAR_REGISTER ( &ag_gauss_fix);
   CVAR_REGISTER ( &ag_rpg_fix);
+  
   CVAR_REGISTER ( &ag_fps_limit_warnings);
   CVAR_REGISTER ( &ag_fps_limit_warnings_interval);
+  CVAR_REGISTER ( &ag_fov_min_enabled);
+  CVAR_REGISTER ( &ag_fov_min_check_interval);
+  CVAR_REGISTER ( &ag_fov_min);
 
   CVAR_REGISTER ( &mm_agsay);
 

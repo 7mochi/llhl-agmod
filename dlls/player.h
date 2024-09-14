@@ -94,6 +94,7 @@ enum sbar_data
 enum request_ids
 {
 	REQUEST_ID_FPS_MAX = 1,
+	REQUEST_ID_DEFAULT_FOV
 };
 
 
@@ -324,8 +325,11 @@ public:
 
 	// Used for framerate limitation
 	static constexpr float MIN_FPS_LIMIT = 20.0; // reasonable limit in case someone limits it to 1 thinking that 1 means just to enable the limiter
+	static constexpr float MIN_FOV_LIMIT = 85.0; // reasonable limit in case someone limits it to a number that is greater than 85
 	int m_iFpsWarnings;
 	float m_flNextFpsWarning;
+
+	float m_flNextFovCheck;
 
 //++ BulliT
 protected:
@@ -392,6 +396,8 @@ public:
   // Used for framerate limitation
   float m_flFpsMax;
 
+  // Used for default_fov limitation
+  int m_iDefaultFOV;
 
   void          Init();     //Init all extra variables.
   const char*   GetAuthID(); //Get steam ID
@@ -461,8 +467,9 @@ public:
   void SetWeaponWeight(const char* pszWeaponWeights);
   void InitWeaponWeight();
   */
-  bool ShouldLimitFps();
+  bool ShouldLimitPlayer();
   void LimitFps();
+  void LimitDefaultFov();
 //-- Martin Webrant
 };
 //++ BulliT
@@ -565,6 +572,9 @@ inline void CBasePlayer::Init()
   m_flFpsMax = 0.0;
   m_iFpsWarnings = 0;
   m_flNextFpsWarning = gpGlobals->time + ag_fps_limit_warnings_interval.value;
+
+  m_iDefaultFOV = 0.0;
+  m_flNextFovCheck = gpGlobals->time + ag_fov_min_check_interval.value;
 #ifdef _DEBUG
   if (0 == strcmp(GetAuthID(),"237555"))
     m_bAdmin = true;

@@ -1938,6 +1938,11 @@ void CvarValue2(const edict_t *pEnt, int requestID, const char *cvarName, const 
         return;
 
 	if (requestID == request_ids::REQUEST_ID_FPS_MAX)
+	{
 		pPlayer->m_flFpsMax = atof(value);
-
+	}
+	else if (requestID == request_ids::REQUEST_ID_DEFAULT_FOV)
+	{
+		pPlayer->m_iDefaultFOV = atoi(value);
+	}
 }

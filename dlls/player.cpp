@@ -1864,6 +1864,7 @@ void CBasePlayer::PreThink(void)
 		return;         // intermission or finale
 
 	g_engfuncs.pfnQueryClientCvarValue2(edict(), "fps_max", request_ids::REQUEST_ID_FPS_MAX);
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "default_fov", request_ids::REQUEST_ID_DEFAULT_FOV);
 
   //++ BulliT
   if (IsSpectator() || ARENA == AgGametype() || LMS == AgGametype())
@@ -2701,12 +2702,13 @@ void CBasePlayer::PostThink()
 //  // Track button info so we can detect 'pressed' and 'released' buttons next frame
 //  m_afButtonLast = pev->button;
 
-  if (ShouldLimitFps())
+  if (ShouldLimitPlayer())
   {
 	// only in gamemode llhl
 	if (LLHL == AgGametype())
 	{
 		LimitFps();
+		LimitDefaultFov();
 	}
   }
   
@@ -5694,8 +5696,7 @@ void CBasePlayer::ShowVGUI(int iMenu)
     MESSAGE_END();
 }
 
-// Can the fps limit be applied on this player?
-bool CBasePlayer::ShouldLimitFps()
+bool CBasePlayer::ShouldLimitPlayer()
 {
 	if (IsSpectator() || IsProxy() || (pev->flags & FL_FAKECLIENT))
 		return false;
@@ -5738,4 +5739,33 @@ void CBasePlayer::LimitFps()
 		sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), text);
 		SERVER_COMMAND(szCommand);
 	}
+}
+
+void CBasePlayer::LimitDefaultFov()
+{
+	auto minDefaultFov = ag_fov_min.value;
+
+	if (ag_fov_min_enabled.value == 0)
+		return;
+
+	if (minDefaultFov > MIN_FOV_LIMIT)
+	{
+		minDefaultFov = MIN_FOV_LIMIT;
+		CVAR_SET_FLOAT("sv_ag_fov_min", MIN_FOV_LIMIT);
+	}
+
+	if (gpGlobals->time < m_flNextFovCheck)
+		return;
+
+	m_flNextFovCheck = gpGlobals->time + ag_fov_min_check_interval.value;
+
+	if (minDefaultFov <= m_iDefaultFOV)
+		return;
+
+	CLIENT_COMMAND(edict(), "default_fov %.2f\n", minDefaultFov);
+
+	char szCommand[64], text[80];
+	sprintf(text, "Your 'default_fov' value is less than %.2f\n", minDefaultFov);
+	sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), text);
+	SERVER_COMMAND(szCommand);
 }

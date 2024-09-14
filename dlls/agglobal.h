@@ -167,6 +167,9 @@ extern cvar_t ag_rpg_fix;
 
 extern cvar_t ag_fps_limit_warnings;
 extern cvar_t ag_fps_limit_warnings_interval;
+extern cvar_t ag_fov_min_enabled;
+extern cvar_t ag_fov_min_check_interval;
+extern cvar_t ag_fov_min;
 
 extern bool g_bLangame;
 extern bool g_bUseTeamColors;
