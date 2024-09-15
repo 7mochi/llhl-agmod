@@ -1865,8 +1865,16 @@ void CBasePlayer::PreThink(void)
 
 	if (!(pev->flags & FL_FAKECLIENT))
 	{
-		g_engfuncs.pfnQueryClientCvarValue2(edict(), "fps_max", request_ids::REQUEST_ID_FPS_MAX);
-		g_engfuncs.pfnQueryClientCvarValue2(edict(), "default_fov", request_ids::REQUEST_ID_DEFAULT_FOV);
+		if (m_fFpsMaxNextQuery <= gpGlobals->time)
+		{
+			g_engfuncs.pfnQueryClientCvarValue2(edict(), "fps_max", request_ids::REQUEST_ID_FPS_MAX);
+			m_fFpsMaxNextQuery = gpGlobals->time + ag_fps_limit_check_interval.value;
+		}
+		else if (m_fFovMinNextQuery <= gpGlobals->time)
+		{
+			g_engfuncs.pfnQueryClientCvarValue2(edict(), "default_fov", request_ids::REQUEST_ID_DEFAULT_FOV);
+			m_fFovMinNextQuery = gpGlobals->time + ag_fov_min_check_interval.value;
+		}
 	}
 
   //++ BulliT
@@ -5756,11 +5764,6 @@ void CBasePlayer::LimitDefaultFov()
 		minDefaultFov = MIN_FOV_LIMIT;
 		CVAR_SET_FLOAT("sv_ag_fov_min", MIN_FOV_LIMIT);
 	}
-
-	if (gpGlobals->time < m_flNextFovCheck)
-		return;
-
-	m_flNextFovCheck = gpGlobals->time + ag_fov_min_check_interval.value;
 
 	if (minDefaultFov <= m_iDefaultFOV)
 		return;

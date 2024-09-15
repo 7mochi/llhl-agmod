@@ -322,14 +322,12 @@ public:
 	float m_flStatusBarDisappearDelay;
 	char m_SbarString0[ SBAR_STRING_SIZE ];
 	char m_SbarString1[ SBAR_STRING_SIZE ];
-
+		
 	// Used for framerate limitation
 	static constexpr float MIN_FPS_LIMIT = 20.0; // reasonable limit in case someone limits it to 1 thinking that 1 means just to enable the limiter
 	static constexpr float MIN_FOV_LIMIT = 85.0; // reasonable limit in case someone limits it to a number that is greater than 85
 	int m_iFpsWarnings;
 	float m_flNextFpsWarning;
-
-	float m_flNextFovCheck;
 
 //++ BulliT
 protected:
@@ -339,6 +337,10 @@ protected:
   float m_fPlayerIdCheck;   //Next time to check player id.
 
   float m_fDisplayGamemode; //Next time to display gamemode.
+
+  float m_fFpsMaxNextQuery; // Next time to query client's fps_max
+
+  float m_fFovMinNextQuery;    // Next time to query client's default_fov
 
   float m_fLongjumpTimer;   //Long jump timer.
 
@@ -495,6 +497,10 @@ inline void CBasePlayer::Init()
 
   m_fDisplayGamemode = gpGlobals->time + 5;
 
+  m_fFpsMaxNextQuery = gpGlobals->time; // Check immediately if it's a new player
+
+  m_fFovMinNextQuery = gpGlobals->time; // Check immediately if it's a new player
+
   m_vKilled = g_vecZero;
 
   m_fFloodLockTill = AgTime();
@@ -574,7 +580,6 @@ inline void CBasePlayer::Init()
   m_flNextFpsWarning = gpGlobals->time + ag_fps_limit_warnings_interval.value;
 
   m_iDefaultFOV = 0.0;
-  m_flNextFovCheck = gpGlobals->time + ag_fov_min_check_interval.value;
 #ifdef _DEBUG
   if (0 == strcmp(GetAuthID(),"237555"))
     m_bAdmin = true;
