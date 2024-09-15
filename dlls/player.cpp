@@ -5759,6 +5759,13 @@ void CBasePlayer::LimitDefaultFov()
 	if (ag_fov_min_enabled.value == 0)
 		return;
 
+	// TODO: Workaround
+	// When I tested and tried with default_fov = 0, I found out that it's the same as using default_fov 90
+	// This is also useful for me because when the player is connecting, the default_fov returns 0 and kicks the player
+	// because the default_fov is less than the minimum fov limit (ag_fov_min)
+	if (m_iDefaultFOV == 0)
+		m_iDefaultFOV = 90;
+
 	if (minDefaultFov > MIN_FOV_LIMIT)
 	{
 		minDefaultFov = MIN_FOV_LIMIT;
