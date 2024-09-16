@@ -213,6 +213,9 @@ int gmsgCTFSound = 0;
 int gmsgMapList = 0;
 int gmsgCTFFlag = 0;
 int gmsgCRC32 = 0;
+int gmsgFpsWarning = 0;
+int gmsgFpsKick = 0;
+int gmsgFovKick = 0;
 
 extern int g_teamplay;
 #ifdef AGSTATS
@@ -292,6 +295,9 @@ void LinkUserMessages( void )
   gmsgMapList     = REG_USER_MSG("MapList", -1);    //MapList
   gmsgCTFFlag			= REG_USER_MSG("CTFFlag",2);		  //Who is carrying the flags.
 	gmsgCRC32				= REG_USER_MSG("CRC32", -1);		  //Checksum, file
+  gmsgFpsWarning		= REG_USER_MSG("FpsWarning", 5);  //A warning for exceeding the fps limit
+  gmsgFpsKick		= REG_USER_MSG("FpsKick", 5);  //Player should be kicked for exceeding the fps limit
+  gmsgFovKick		= REG_USER_MSG("FovKick", 5);  //Player should be kicked for exceeding the fov limit
   //-- Martin Webrant
 #ifdef AG_NO_CLIENT_DLL
 	gmsgStatusText = REG_USER_MSG("StatusText", -1);
@@ -5750,21 +5756,20 @@ void CBasePlayer::LimitFps()
 		m_flNextFpsWarning = gpGlobals->time + (ag_fps_limit_check_interval.value * 2);
 		m_iFpsWarnings++;
 
-		char text[80];
-		sprintf(text, "Warning #%d: Your 'fps_max' can't be higher than %.2f\n", m_iFpsWarnings, fpsLimit);
-		UTIL_SayText(text, this);
+		MESSAGE_BEGIN( MSG_ONE, gmsgFpsWarning, NULL, pev );
+		  WRITE_BYTE( (int) m_iFpsWarnings );
+		  WRITE_LONG( (int) fpsLimit );
+		MESSAGE_END();
 	}
 
 	if (m_iFpsWarnings > ag_fps_limit_warnings.value)
 	{
-		char szCommand[64], szCommandMessage[80], szChatMessage[160];
-		sprintf(szCommandMessage, "Your 'fps_max' value is higher than %.2f\n", fpsLimit);
-		sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), szCommandMessage);
-		SERVER_COMMAND(szCommand);
+		MESSAGE_BEGIN( MSG_ALL, gmsgFpsKick );
+		  WRITE_BYTE( ENTINDEX(edict()) );
+		  WRITE_LONG( (int) fpsLimit );
+		MESSAGE_END();
 
-		// TODO: Sometimes the message is printed twice
-		sprintf(szChatMessage, "%s has been kicked for exceeding the FPS limit (Max: %.2f)", STRING(pev->netname), fpsLimit);
-		UTIL_SayTextAll(szChatMessage, this);
+		// I'll leave the job of logging and kicking the player to the amxx plugin because i want it to be multilang
 	}
 }
 
@@ -5793,12 +5798,10 @@ void CBasePlayer::LimitDefaultFov()
 
 	CLIENT_COMMAND(edict(), "default_fov %.2f\n", minDefaultFov);
 
-	char szCommand[64], szCommandMessage[80], szChatMessage[160];
-	sprintf(szCommandMessage, "Your 'default_fov' value is less than %.2f\n", minDefaultFov);
-	sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), szCommandMessage);
-	SERVER_COMMAND(szCommand);
+	MESSAGE_BEGIN( MSG_ALL, gmsgFovKick );
+	  WRITE_BYTE( ENTINDEX(edict()) );
+	  WRITE_LONG( (int) minDefaultFov );
+	MESSAGE_END();
 
-	// TODO: Sometimes the message is printed twice
-	sprintf(szChatMessage, "%s has been kicked for exceeding the minimum FOV value (Min: %.2f)", STRING(pev->netname), minDefaultFov);
-	UTIL_SayTextAll(szChatMessage, this);
+	// I'll leave the job of logging and kicking the player to the amxx plugin because i want it to be multilang
 }
