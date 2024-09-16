@@ -510,7 +510,7 @@ inline void CBasePlayer::Init()
   m_fFloodLockTill = AgTime();
   for (int i = 0 ; i < sizeof(m_afFloodWhen) / sizeof(m_afFloodWhen[0]); i++)
   {
-    m_afFloodWhen[i] = AgTime();
+    m_afFloodWhen[i] = AgTime() - ag_floodpersecond.value;
   }
 	m_iFloodWhenHead = 0;
 
