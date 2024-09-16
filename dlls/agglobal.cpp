@@ -176,6 +176,7 @@ DLL_GLOBAL cvar_t ag_fov_min_enabled = { "sv_ag_fov_min_enabled", "1", FCVAR_SER
 DLL_GLOBAL cvar_t ag_fov_min_check_interval = { "sv_ag_fov_min_check_interval", "1.5", FCVAR_SERVER };  // Default: 1.5 seconds - How often to check for changing the limit
 DLL_GLOBAL cvar_t ag_fov_min = { "sv_ag_fov_min", "85", FCVAR_SERVER };  // Default: 85 - Minimum value for default_fov
 DLL_GLOBAL cvar_t ag_respawn_delay = { "sv_ag_respawn_delay", "0.75", FCVAR_SERVER };  // Default: 0.75 - avg @ 144 fps was 0.83s, but sometimes it went down to 0.7s
+DLL_GLOBAL cvar_t ag_block_vote_spectators = { "sv_ag_block_vote_spectators", "1", FCVAR_SERVER };  // Default: 1 - Block spectators to vote
 
 DLL_GLOBAL cvar_t ag_gauss_fix = {"ag_gauss_fix","0"};            //Default 0 - no fix.
 DLL_GLOBAL cvar_t ag_rpg_fix   = {"ag_rpg_fix","0"};    
@@ -342,6 +343,7 @@ void AgInitGame()
   CVAR_REGISTER ( &ag_fov_min_check_interval);
   CVAR_REGISTER ( &ag_fov_min);
   CVAR_REGISTER ( &ag_respawn_delay);
+  CVAR_REGISTER ( &ag_block_vote_spectators);
 
   CVAR_REGISTER ( &mm_agsay);
 

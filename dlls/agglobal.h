@@ -171,6 +171,7 @@ extern cvar_t ag_fov_min_enabled;
 extern cvar_t ag_fov_min_check_interval;
 extern cvar_t ag_fov_min;
 extern cvar_t ag_respawn_delay;
+extern cvar_t ag_block_vote_spectators;
 
 extern bool g_bLangame;
 extern bool g_bUseTeamColors;

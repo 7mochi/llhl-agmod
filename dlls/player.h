@@ -474,6 +474,8 @@ public:
   bool ShouldLimitPlayer();
   void LimitFps();
   void LimitDefaultFov();
+
+  bool HasVotingRestrictions();
 //-- Martin Webrant
 };
 //++ BulliT

@@ -97,6 +97,14 @@ bool AgVote::HandleCommand(CBasePlayer* pPlayer)
   */
   if (m_fMaxTime || m_fNextCount)
   {
+    if (pPlayer->HasVotingRestrictions() && LLHL == AgGametype())
+    {
+      if (FStrEq("yes", CMD_ARGV(0)) || FStrEq("no", CMD_ARGV(0)))
+        AgConsole("Spectators are not allowed to vote.", pPlayer);
+      
+      return false;
+    }
+
     if (FStrEq("yes",CMD_ARGV(0)))
     {
       pPlayer->m_iVote = 1;
@@ -360,6 +368,12 @@ bool AgVote::HandleCommand(CBasePlayer* pPlayer)
 
 bool AgVote::CallVote(CBasePlayer* pPlayer)
 {
+  if (pPlayer->HasVotingRestrictions() && !pPlayer->IsAdmin() && LLHL == AgGametype())
+  {
+    AgConsole("Spectators are not allowed to start a vote.", pPlayer);
+    return false;
+  }
+
   m_fMaxTime = AgTime() + 30.0;  //30 seconds is enough.
   m_fNextCount = AgTime();       //Next count directly
   pPlayer->m_iVote = 1;          //Voter voted yes
@@ -397,6 +411,11 @@ void AgVote::Think()
       CBasePlayer* pPlayerLoop = AgPlayerByIndex(i);
       if (pPlayerLoop && !pPlayerLoop->IsProxy())
       {
+        if (pPlayerLoop->HasVotingRestrictions() && LLHL == AgGametype())
+        {
+          // Players who are not playing cannot vote if votes are blocked for spectators
+          continue;
+        }
         iPlayers++;
 
         if (1 == pPlayerLoop->m_iVote)
@@ -546,6 +565,17 @@ bool AgVote::ResetVote()
   m_fNextVote = AgTime();
   m_bRunning = false;
   return true;
+}
+
+bool CBasePlayer::HasVotingRestrictions()
+{
+  if (ag_block_vote_spectators.value == 0.0f)
+    return false;
+  
+  if (ag_block_vote_spectators.value >= 1.0f && IsSpectator())
+    return true;
+  
+  return false;
 }
 
 //-- Martin Webrant
