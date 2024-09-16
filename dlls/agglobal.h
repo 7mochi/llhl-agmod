@@ -170,6 +170,7 @@ extern cvar_t ag_fps_limit_check_interval;
 extern cvar_t ag_fov_min_enabled;
 extern cvar_t ag_fov_min_check_interval;
 extern cvar_t ag_fov_min;
+extern cvar_t ag_respawn_delay;
 
 extern bool g_bLangame;
 extern bool g_bUseTeamColors;

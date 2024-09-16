@@ -958,6 +958,7 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	SetAnimation( PLAYER_DIE );
 	
 	m_iRespawnFrames = 0;
+	m_flDeathAnimationStartTime = gpGlobals->time;
 
 	pev->modelindex = g_ulModelIndexPlayer;    // don't use eyes
 
@@ -1358,13 +1359,24 @@ void CBasePlayer::PlayerDeathThink(void)
 
 
 	if (pev->modelindex && (!m_fSequenceFinished) && (pev->deadflag == DEAD_DYING))
-	{
 		StudioFrameAdvance( );
 
+	if (LLHL == AgGametype())
+	{
+		// time given to animate corpse and don't allow to respawn till this time ends
+		if (gpGlobals->time < m_flDeathAnimationStartTime + (ag_respawn_delay.value >= 0.0 ? ag_respawn_delay.value : 0.0))
+			return;
+	}
+	else
+	{
 		m_iRespawnFrames++;				// Note, these aren't necessarily real "frames", so behavior is dependent on # of client movement commands
 		if ( m_iRespawnFrames < 120 )   // Animations should be no longer than this
 			return;
 	}
+
+	// make sure players with high fps finish the animation
+	if (pev->frame < 255)
+		pev->frame = 255;
 
 	// once we're done animating our death and we're on the ground, we want to set movetype to None so our dead body won't do collisions and stuff anymore
 	// this prevents a bug where the dead body would go to a player's head if he walked over it while the dead player was clicking their button to respawn
