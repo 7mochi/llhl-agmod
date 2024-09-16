@@ -329,6 +329,8 @@ public:
 	int m_iFpsWarnings;
 	float m_flNextFpsWarning;
 
+	float m_flDeathAnimationStartTime;
+
 //++ BulliT
 protected:
   bool m_bAdmin;            //Player gained admin status.
