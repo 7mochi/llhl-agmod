@@ -1374,6 +1374,10 @@ void CBasePlayer::PlayerDeathThink(void)
 			return;
 	}
 
+	// make sure players with high fps finish the animation
+	if (pev->frame < 255)
+		pev->frame = 255;
+
 	// once we're done animating our death and we're on the ground, we want to set movetype to None so our dead body won't do collisions and stuff anymore
 	// this prevents a bug where the dead body would go to a player's head if he walked over it while the dead player was clicking their button to respawn
 	if ( pev->movetype != MOVETYPE_NONE && FBitSet(pev->flags, FL_ONGROUND) )
