@@ -5745,10 +5745,14 @@ void CBasePlayer::LimitFps()
 
 	if (m_iFpsWarnings > ag_fps_limit_warnings.value)
 	{
-		char szCommand[64], text[80];
-		sprintf(text, "Your 'fps_max' value is higher than %.2f\n", fpsLimit);
-		sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), text);
+		char szCommand[64], szCommandMessage[80], szChatMessage[160];
+		sprintf(szCommandMessage, "Your 'fps_max' value is higher than %.2f\n", fpsLimit);
+		sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), szCommandMessage);
 		SERVER_COMMAND(szCommand);
+
+		// TODO: Sometimes the message is printed twice
+		sprintf(szChatMessage, "%s has been kicked for exceeding the FPS limit (Max: %.2f)", STRING(pev->netname), fpsLimit);
+		UTIL_SayTextAll(szChatMessage, this);
 	}
 }
 
@@ -5777,8 +5781,12 @@ void CBasePlayer::LimitDefaultFov()
 
 	CLIENT_COMMAND(edict(), "default_fov %.2f\n", minDefaultFov);
 
-	char szCommand[64], text[80];
-	sprintf(text, "Your 'default_fov' value is less than %.2f\n", minDefaultFov);
-	sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), text);
+	char szCommand[64], szCommandMessage[80], szChatMessage[160];
+	sprintf(szCommandMessage, "Your 'default_fov' value is less than %.2f\n", minDefaultFov);
+	sprintf(szCommand, "kick #%d \"%s\"\n", GETPLAYERUSERID(edict()), szCommandMessage);
 	SERVER_COMMAND(szCommand);
+
+	// TODO: Sometimes the message is printed twice
+	sprintf(szChatMessage, "%s has been kicked for exceeding the minimum FOV value (Min: %.2f)", STRING(pev->netname), minDefaultFov);
+	UTIL_SayTextAll(szChatMessage, this);
 }
