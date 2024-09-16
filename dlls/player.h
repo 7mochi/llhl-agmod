@@ -577,7 +577,7 @@ inline void CBasePlayer::Init()
 
   m_flFpsMax = 0.0;
   m_iFpsWarnings = 0;
-  m_flNextFpsWarning = gpGlobals->time + ag_fps_limit_warnings_interval.value;
+  m_flNextFpsWarning = gpGlobals->time + (ag_fps_limit_check_interval.value * 2);
 
   m_iDefaultFOV = 0.0;
 #ifdef _DEBUG

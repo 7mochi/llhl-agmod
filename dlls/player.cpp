@@ -5733,10 +5733,10 @@ void CBasePlayer::LimitFps()
 	
 	if (m_flNextFpsWarning < gpGlobals->time)
 	{
-		m_flNextFpsWarning = gpGlobals->time + ag_fps_limit_warnings_interval.value;
-		m_iFpsWarnings++;
-
 		CLIENT_COMMAND(edict(), "fps_max %.2f\n", fpsLimit);
+		
+		m_flNextFpsWarning = gpGlobals->time + (ag_fps_limit_check_interval.value * 2);
+		m_iFpsWarnings++;
 
 		char text[80];
 		sprintf(text, "Warning #%d: Your 'fps_max' can't be higher than %.2f\n", m_iFpsWarnings, fpsLimit);
