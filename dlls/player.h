@@ -584,10 +584,6 @@ inline void CBasePlayer::Init()
   m_flNextFpsWarning = gpGlobals->time + (ag_fps_limit_check_interval.value * 2);
 
   m_iDefaultFOV = 0.0;
-#ifdef _DEBUG
-  if (0 == strcmp(GetAuthID(),"237555"))
-    m_bAdmin = true;
-#endif
 };
 
 
