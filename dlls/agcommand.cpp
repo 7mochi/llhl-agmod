@@ -254,6 +254,14 @@ FILE_GLOBAL char* s_szVars[] =
   "sv_ag_headshot <1-3> - Set power of headshot. Normally 3.",
   "sv_ag_blastradius <1> - Blast radius for explosions. Normally 1",
   "sv_ag_allowed_gamemodes <ffa;tdm> - Allowed gamemodes, could be any off ffa;tdm;arena;arcade;sgbow;instagib",
+  // LLHL
+  "sv_ag_fps_limit_warnings <2> - [LLHL] How many warnings before kicking the player.",
+  "sv_ag_fps_limit_check_interval <5.0> - [LLHL] How often to check for changing the FPS limit.",
+  "sv_ag_fov_min_enabled <0/1> - [LLHL] Enable/Disable default_fov minimum value check.",
+  "sv_ag_fov_min_check_interval <1.5> - [LLHL] How often to check for changing the limit.",
+  "sv_ag_fov_min <85> - [LLHL] Minimum value for default_fov.",
+  "sv_ag_respawn_delay <0.75> - [LLHL] Delay before respawn.",
+  "sv_ag_block_vote_spectators <0/1> - [LLHL] Block spectators to vote.",
 };
 
 AgCommand::AgCommand()

@@ -170,10 +170,10 @@ DLL_GLOBAL cvar_t ag_dom_resetscorelimit   = {"sv_ag_dom_resetscorelimit", "6"};
 DLL_GLOBAL cvar_t ag_dom_scorelimit        = {"sv_ag_dom_scorelimit", "200"}; // max points a team needs to get to win the game
 //-- muphicks
 
-DLL_GLOBAL cvar_t	ag_fps_limit_warnings = { "sv_ag_fps_limit_warnings", "2", FCVAR_SERVER };  // Default: 2 - How many warnings before applying the punishment
-DLL_GLOBAL cvar_t ag_fps_limit_check_interval = { "sv_ag_fps_limit_check_interval", "5.0", FCVAR_SERVER };  // Default: 5 seconds - How often to check for changing the limit
+DLL_GLOBAL cvar_t	ag_fps_limit_warnings = { "sv_ag_fps_limit_warnings", "2", FCVAR_SERVER };  // Default: 2 - How many warnings before kicking the player
+DLL_GLOBAL cvar_t ag_fps_limit_check_interval = { "sv_ag_fps_limit_check_interval", "5.0", FCVAR_SERVER };  // Default: 5 seconds - How often to check for changing the FPS limit
 DLL_GLOBAL cvar_t ag_fov_min_enabled = { "sv_ag_fov_min_enabled", "1", FCVAR_SERVER };  // Default: 1 - Enable/Disable default_fov minimum value check
-DLL_GLOBAL cvar_t ag_fov_min_check_interval = { "sv_ag_fov_min_check_interval", "1.5", FCVAR_SERVER };  // Default: 1.5 seconds - How often to check for changing the limit
+DLL_GLOBAL cvar_t ag_fov_min_check_interval = { "sv_ag_fov_min_check_interval", "1.5", FCVAR_SERVER };  // Default: 1.5 seconds - How often to check for changing the FOV limit
 DLL_GLOBAL cvar_t ag_fov_min = { "sv_ag_fov_min", "85", FCVAR_SERVER };  // Default: 85 - Minimum value for default_fov
 DLL_GLOBAL cvar_t ag_respawn_delay = { "sv_ag_respawn_delay", "0.75", FCVAR_SERVER };  // Default: 0.75 - avg @ 144 fps was 0.83s, but sometimes it went down to 0.7s
 DLL_GLOBAL cvar_t ag_block_vote_spectators = { "sv_ag_block_vote_spectators", "1", FCVAR_SERVER };  // Default: 1 - Block spectators to vote
