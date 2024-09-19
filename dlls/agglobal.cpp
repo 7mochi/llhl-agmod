@@ -177,6 +177,25 @@ DLL_GLOBAL cvar_t ag_fov_min_check_interval = { "sv_ag_fov_min_check_interval", 
 DLL_GLOBAL cvar_t ag_fov_min = { "sv_ag_fov_min", "85", FCVAR_SERVER };  // Default: 85 - Minimum value for default_fov
 DLL_GLOBAL cvar_t ag_respawn_delay = { "sv_ag_respawn_delay", "0.75", FCVAR_SERVER };  // Default: 0.75 - avg @ 144 fps was 0.83s, but sometimes it went down to 0.7s
 DLL_GLOBAL cvar_t ag_block_vote_spectators = { "sv_ag_block_vote_spectators", "1", FCVAR_SERVER };  // Default: 1 - Block spectators to vote
+//++ Nukes / Ghostmining / Lampgaussing ++
+DLL_GLOBAL cvar_t ag_nuke_grenade = { "sv_ag_nuke_grenade", "0", FCVAR_SERVER };  // Default: 0 - Allow grenade nukes
+DLL_GLOBAL cvar_t ag_nuke_crossbow = { "sv_ag_nuke_crossbow", "0", FCVAR_SERVER };  // Default: 0 - Allow bolt nukes
+DLL_GLOBAL cvar_t ag_nuke_rpg = { "sv_ag_nuke_rpg", "0", FCVAR_SERVER };  // Default: 0 - Allow rocket nukes
+DLL_GLOBAL cvar_t ag_nuke_gauss = { "sv_ag_nuke_gauss", "1", FCVAR_SERVER };  // Default: 1 - Allow lampgauss and other nukes
+DLL_GLOBAL cvar_t ag_nuke_egon = { "sv_ag_nuke_egon", "0", FCVAR_SERVER };  // Default: 0 - Allow egon through ceiling
+DLL_GLOBAL cvar_t ag_nuke_tripmine = { "sv_ag_nuke_tripmine", "0", FCVAR_SERVER };  // Default: 0 - Allow ghostmines
+DLL_GLOBAL cvar_t ag_nuke_satchel = { "sv_ag_nuke_satchel", "0", FCVAR_SERVER };  // Default: 0 - Allow satchel nukes
+DLL_GLOBAL cvar_t ag_nuke_snark = { "sv_ag_nuke_snark", "0", FCVAR_SERVER };  // Default: 0 - Allow exploding snark nukes
+
+// There's some weird code in CGrenade::Explode that pulls the explosion out of the surface, sometimes WAY too much, to the point where
+// it can go and explode at the other side of a wall/ceiling/floor, like when you put satchels on lamps in boot_camp. And how far it
+// pulls it out of the surface depends on the damage it deals, which I don't think is correct. So this fixes that, but it has the side-effect
+// of fixing most of the ghostmining you can do with explosives (satchels, tripmines, rockets, and grenades in general), which should in theory
+// be handled by the ag_nuke* specific cvars, so yeah there's some functionality overlap here, but it's not 100% since this fixes satchels
+// on lamps in boot_camp exploding at the other side of the ceiling, which doesn't produce a nuke, so it's not ignorable with sv_ag_nuke_satchel 0;
+// and the nuke cvars should prevent ANY case of nuking, and there might be cases leading to a nuke where the explosion fix has nothing to do.
+DLL_GLOBAL cvar_t ag_explosion_fix = { "sv_ag_explosion_fix", "0", FCVAR_SERVER };  // Default: 0 - Fix the explosion origin
+//-- Nukes / Ghostmining / Lampgaussing --
 
 DLL_GLOBAL cvar_t ag_gauss_fix = {"ag_gauss_fix","0"};            //Default 0 - no fix.
 DLL_GLOBAL cvar_t ag_rpg_fix   = {"ag_rpg_fix","0"};    
@@ -333,6 +352,19 @@ void AgInitGame()
   CVAR_REGISTER ( &ag_dom_resetscorelimit);
   CVAR_REGISTER ( &ag_dom_scorelimit );
   //-- muphicks
+
+  //++ Nukes / Ghostmining / Lampgaussing ++
+  CVAR_REGISTER ( &ag_nuke_grenade);
+  CVAR_REGISTER ( &ag_nuke_crossbow);
+  CVAR_REGISTER ( &ag_nuke_rpg);
+  CVAR_REGISTER ( &ag_nuke_gauss);
+  CVAR_REGISTER ( &ag_nuke_egon);
+  CVAR_REGISTER ( &ag_nuke_tripmine);
+  CVAR_REGISTER ( &ag_nuke_satchel);
+  CVAR_REGISTER ( &ag_nuke_snark);
+
+  CVAR_REGISTER ( &ag_explosion_fix);
+  //-- Nukes / Ghostmining / Lampgaussing --
 
   CVAR_REGISTER ( &ag_gauss_fix);
   CVAR_REGISTER ( &ag_rpg_fix);
@@ -1109,6 +1141,38 @@ const char* AgGetDirectoryValve()
 	}
 	szDirectory[iStart] = '\0';
 	return szDirectory;
+}
+
+bool IsNukeAllowed(entvars_t* pevInflictor)
+{
+    if (LLHL != AgGametype())
+        return true;
+
+    if (FClassnameIs(pevInflictor, "grenade"))
+        return ag_nuke_grenade.value != 0.0f; // TODO: differentiate between handgrenade and smg nade
+
+    else if (FClassnameIs(pevInflictor, "bolt"))
+        return ag_nuke_crossbow.value != 0.0f; // untested, 30-Dec-2021
+
+    else if (FClassnameIs(pevInflictor, "weapon_gauss"))
+        return ag_nuke_gauss.value != 0.0f;
+
+    else if (FClassnameIs(pevInflictor, "weapon_egon"))
+        return ag_nuke_egon.value != 0.0f;
+
+    else if (FClassnameIs(pevInflictor, "rpg_rocket"))
+        return ag_nuke_rpg.value != 0.0f;
+
+    else if (FClassnameIs(pevInflictor, "monster_satchel"))
+        return ag_nuke_satchel.value != 0.0f;
+
+    else if (FClassnameIs(pevInflictor, "monster_tripmine"))
+        return ag_nuke_tripmine.value != 0.0f;
+
+    else if (FClassnameIs(pevInflictor, "monster_snark"))
+        return ag_nuke_snark.value != 0.0f; // untested, 30-Dec-2021
+
+    return false;
 }
 
 //-- Martin Webrant
