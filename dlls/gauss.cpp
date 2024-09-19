@@ -551,11 +551,17 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
         //if ( !m_fPrimaryFire )
 //-- Martin Webrant
 				{
-					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
+					Vector startPoint;
+					if (ag_nuke_gauss.value != 0.0f || LLHL != AgGametype())
+						startPoint = tr.vecEndPos + vecDir * 8;
+					else if (LLHL == AgGametype())
+						startPoint = tr.vecEndPos + vecDir;
+
+					UTIL_TraceLine(startPoint, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
 					if (!beam_tr.fAllSolid)
 					{
 						// trace backwards to find exit point
-						UTIL_TraceLine( beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
+						UTIL_TraceLine(beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
 
 						float n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
 
@@ -583,8 +589,17 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 							{
 								damage_radius = flDamage * 2.5;
 							}
-
-							::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
+							
+							Vector damagePoint;
+							if (ag_nuke_gauss.value != 0.0f || LLHL != AgGametype())
+								damagePoint = beam_tr.vecEndPos + vecDir * 8;
+							else if (LLHL == AgGametype())
+							{
+								// TODO: do another traceline to determine the point and don't allow it to go through
+								// if it's all solid or if it starts in solid I guess
+								damagePoint = beam_tr.vecEndPos + vecDir;
+							}
+							::RadiusDamage( damagePoint, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
 
 							CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
 

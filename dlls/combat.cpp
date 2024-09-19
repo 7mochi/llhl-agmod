@@ -32,6 +32,7 @@
 
 //++ BulliT
 #include "agglobal.h"
+#include "gamerules.h"
 //-- Martin Webrant
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -1038,11 +1039,11 @@ float CBaseMonster :: DamageForce( float damage )
 // only damage ents that can clearly be seen by the explosion!
 
 	
-void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType )
+void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType, CBaseEntity* directHit )
 {
 	CBaseEntity *pEntity = NULL;
 	TraceResult	tr;
-	float		flAdjustedDamage, falloff;
+	float		flAdjustedDamage, flFalloffReducedDamage, falloff;
 	Vector		vecSpot;
 
 //++ BulliT
@@ -1081,18 +1082,66 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 			
 			UTIL_TraceLine ( vecSrc, vecSpot, dont_ignore_monsters, ENT(pevInflictor), &tr );
 
+			if (tr.flFraction != 1.0 && tr.pHit != pEntity->edict() && directHit
+				&& tr.pHit == directHit->edict() && ag_explosion_fix.value != 0.0f && LLHL == AgGametype())
+			{
+				// Sometimes when it's a direct hit, the radius damage is located somewhere around the player model
+				// that may lead to not being able to trace a straight line to other entities around it, for example
+				// a nade falling at player's chest while his arms are extended handling a glock, so it's kind of
+				// hugging the radius damage and acting as a meatshield for everything outside the model hitbox.
+				// So we have to ignore this directly hit player to trace to other entities around, but we can only
+				// ignore one entity at a time so we move the inflictor (e.g.: a nade) out of the map temporarily
+				// so that we can ignore the player and the inflictor is also out of the way, and we thus don't have
+				// to do a couple tracelines more only to trace to this other entity in the surroundings
+				const auto realOrigin = pevInflictor->origin;
+				pevInflictor->origin = Vector(99999, 99999, 99999);
+				UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, directHit->edict(), &tr);
+				pevInflictor->origin = realOrigin;
+			}
+			
 			if ( tr.flFraction == 1.0 || tr.pHit == pEntity->edict() )
 			{// the explosion can 'see' this entity, so hurt them!
 				if (tr.fStartSolid)
 				{
-					// if we're stuck inside them, fixup the position and distance
-					tr.vecEndPos = vecSrc;
-					tr.flFraction = 0.0;
+					auto isValidHit = false;
+					if (!UTIL_IsPointInEntity(vecSrc, pEntity))
+					{
+						// We're NOT stuck inside the attacker, so it's probably either ghostmining/lampgauss or
+						// some valid radius damage in the ceiling, like a gauss reflection (not wallgauss) at the
+						// top border of a door frame, or just a nade hitting another player and getting stuck in them
+						// So now we're gonna figure out if it was a valid radius damage at the ceiling, by tracing
+						// another line without the initial increment for explosives lying on the floor...
+						vecSrc.z -= 1;
+
+						TraceResult tr2;
+						UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, ENT(pevInflictor), &tr2);
+
+						if (!tr2.fStartSolid && tr.flFraction != 0.0f && tr2.flFraction != 0.0f && tr2.pHit == pEntity->edict())
+							isValidHit = true;
+
+						if (!isValidHit && !IsNukeAllowed(pevInflictor))
+							continue;
+					}
+
+					if (!(isValidHit && ag_explosion_fix.value != 0.0f && LLHL == AgGametype()))
+					{
+						// if we're stuck inside them, fixup the position and distance
+						tr.vecEndPos = vecSrc;
+						tr.flFraction = 0.0;
+					}
 				}
 				
-				// decrease damage for an ent that's farther from the bomb.
-				flAdjustedDamage = ( vecSrc - tr.vecEndPos ).Length() * falloff;
-				flAdjustedDamage = flDamage - flAdjustedDamage;
+				if (ag_explosion_fix.value != 0.0f && LLHL == AgGametype() && directHit == pEntity)
+				{
+					// Radius damage that is a direct hit should deal full damage instead of a ~99.5%
+					flFalloffReducedDamage = -0.01f;
+				}
+				else
+				{
+					// Decrease damage for an ent that's farther from the bomb
+					flFalloffReducedDamage = (vecSrc - tr.vecEndPos).Length() * falloff;
+				}
+				flAdjustedDamage = flDamage - flFalloffReducedDamage;
 			
 				if ( flAdjustedDamage < 0 )
 				{
@@ -1116,15 +1165,15 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 }
 
 
-void CBaseMonster :: RadiusDamage(entvars_t* pevInflictor, entvars_t*	pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType )
+void CBaseMonster :: RadiusDamage(entvars_t* pevInflictor, entvars_t*	pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType, CBaseEntity* directHit )
 {
-	::RadiusDamage( pev->origin, pevInflictor, pevAttacker, flDamage, flDamage * 2.5, iClassIgnore, bitsDamageType );
+	::RadiusDamage( pev->origin, pevInflictor, pevAttacker, flDamage, flDamage * 2.5, iClassIgnore, bitsDamageType, directHit );
 }
 
 
-void CBaseMonster :: RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType )
+void CBaseMonster :: RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType, CBaseEntity* directHit )
 {
-	::RadiusDamage( vecSrc, pevInflictor, pevAttacker, flDamage, flDamage * 2.5, iClassIgnore, bitsDamageType );
+	::RadiusDamage( vecSrc, pevInflictor, pevAttacker, flDamage, flDamage * 2.5, iClassIgnore, bitsDamageType, directHit );
 }
 
 

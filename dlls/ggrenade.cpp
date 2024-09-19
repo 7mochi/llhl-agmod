@@ -26,6 +26,8 @@
 #include "nodes.h"
 #include "soundent.h"
 #include "decals.h"
+#include "agglobal.h"
+#include "gamerules.h"
 
 //===================grenade
 
@@ -59,8 +61,18 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 	// Pull out of the wall a bit
 	if ( pTrace->flFraction != 1.0 )
 	{
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * (pev->dmg - 24) * 0.6);
+		if (ag_explosion_fix.value != 0.0f && LLHL == AgGametype())
+		{
+			if (!pTrace->fStartSolid)
+				pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * pTrace->flFraction);
+		}
+		else
+			pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * (pev->dmg - 24) * 0.6);
 	}
+
+	CBaseEntity* directHit = nullptr;
+	if (pTrace->pHit)
+		directHit = CBaseEntity::Instance(pTrace->pHit);
 
 	int iContents = UTIL_PointContents ( pev->origin );
 	
@@ -91,7 +103,7 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	RadiusDamage ( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType );
+	RadiusDamage ( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType, directHit );
 
 	if ( RANDOM_FLOAT( 0 , 1 ) < 0.5 )
 	{
@@ -173,8 +185,21 @@ void CGrenade::Detonate( void )
 	TraceResult tr;
 	Vector		vecSpot;// trace starts here!
 
-	vecSpot = pev->origin + Vector ( 0 , 0 , 8 );
-	UTIL_TraceLine ( vecSpot, vecSpot + Vector ( 0, 0, -40 ),  ignore_monsters, ENT(pev), & tr);
+	if (ag_explosion_fix.value == 0.0f)
+	{
+		vecSpot = pev->origin + Vector (0 , 0 , 8);
+		UTIL_TraceLine(vecSpot, vecSpot + Vector (0, 0, -40), ignore_monsters, ENT(pev), &tr);
+	}
+	else if (LLHL == AgGametype())
+	{
+		vecSpot = pev->origin;
+		// We try to place it a bit upwards, making sure it doesn't go through a ceiling or something
+		UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, 4), ignore_monsters, ENT(pev), &tr);
+		if (!tr.fStartSolid)
+			vecSpot.z = vecSpot.z + (4.0f * tr.flFraction * 0.9f);
+
+		UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
+	}
 
 	Explode( &tr, DMG_BLAST );
 }
@@ -190,8 +215,21 @@ void CGrenade::ExplodeTouch( CBaseEntity *pOther )
 
 	pev->enemy = pOther->edict();
 
-	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
-	UTIL_TraceLine( vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr );
+	if (ag_explosion_fix.value == 0.0f)
+	{
+		vecSpot = pev->origin - pev->velocity.Normalize() * 32;
+		UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr);
+	}
+	else if (LLHL == AgGametype())
+	{
+		// Pull out of the wall/player a bit
+		vecSpot = pev->origin - pev->velocity.Normalize() * 4;
+
+		// We don't ignore monsters here, because if we hit a player we don't want the trace to go through
+		// and end up at the other side, making the explosion happen in a whole different part where it might
+		// not hurt surrounding players (using this pOther as a meatshield that takes all the damage)
+		UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 8, dont_ignore_monsters, ENT(pev), &tr);
+	}
 
 	Explode( &tr, DMG_BLAST );
 }

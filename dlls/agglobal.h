@@ -162,6 +162,19 @@ extern cvar_t ag_dom_resetscorelimit;
 extern cvar_t ag_dom_scorelimit;
 //-- muphicks
 
+//++ Nukes / Ghostmining / Lampgaussing ++
+extern cvar_t ag_nuke_grenade;
+extern cvar_t ag_nuke_crossbow;
+extern cvar_t ag_nuke_rpg;
+extern cvar_t ag_nuke_gauss;
+extern cvar_t ag_nuke_egon;
+extern cvar_t ag_nuke_tripmine;
+extern cvar_t ag_nuke_satchel;
+extern cvar_t ag_nuke_snark;
+
+extern cvar_t ag_explosion_fix;
+//-- Nukes / Ghostmining / Lampgaussing --
+
 extern cvar_t ag_gauss_fix;
 extern cvar_t ag_rpg_fix;
 
@@ -225,6 +238,7 @@ bool AgIsLocalServer();
 const char* AgGetGame();
 const char* AgGetDirectory();
 const char* AgGetDirectoryValve();
+bool IsNukeAllowed(entvars_t* pevInflictor);
 
 #endif // !defined(_AG_GLOBAL_H_)
 
